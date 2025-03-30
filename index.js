@@ -1,7 +1,7 @@
 const express = require("express");
 const bip39 = require("bip39");
 const bitcoin = require("bitcoinjs-lib");
-const { ethers, JsonRpcProvider } = require("ethers");
+const { ethers, JsonRpcProvider, formatEther } = require("ethers");
 const ecc = require("tiny-secp256k1");
 const bip32 = require("bip32").BIP32Factory(ecc);
 
@@ -22,7 +22,7 @@ const generateEthereumWallet = async (mnemonic) => {
     name: "Sepolia Ethereum",
     address: wallet.address,
     privateKey: wallet.privateKey,
-    balance: ethers.utils.formatEther(balance),
+    balance: formatEther(balance),
   };
 };
 
