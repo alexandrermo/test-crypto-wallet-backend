@@ -166,8 +166,10 @@ app.get("/total-supply-token", async (req, res) => {
       return totalSupplyFormatted;
     }
 
+    const totalSupply = await getTotalSupply();
+
     res.json({
-      totalSupply: getTotalSupply(),
+      totalSupply,
     });
   } catch (error) {
     console.log(error);
