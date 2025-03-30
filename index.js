@@ -13,14 +13,16 @@ app.use(express.json());
 const sepoliaEtherumProviderUrl =
   "https://sepolia.infura.io/v3/76738d80216e4e46a761b1bdec75d9bf";
 
-const generateEthereumWallet = (mnemonic) => {
+const generateEthereumWallet = async (mnemonic) => {
   const provider = new JsonRpcProvider(sepoliaEtherumProviderUrl);
   const wallet = ethers.Wallet.fromPhrase(mnemonic).connect(provider);
+  const balance = await provider.getBalance(wallet.address);
 
   return {
     name: "Sepolia Ethereum",
     address: wallet.address,
     privateKey: wallet.privateKey,
+    balance: ethers.utils.formatEther(balance),
   };
 };
 
@@ -93,9 +95,11 @@ const generateDogecoinWallet = (mnemonic) => {
   };
 };
 
-const generateWallets = (mnemonic) => {
+const generateWallets = async (mnemonic) => {
+  const etherum = await generateEthereumWallet(mnemonic);
+
   const walletsGenerated = {
-    etherum: generateEthereumWallet(mnemonic),
+    etherum,
     bitcoin: generateBitcoinWallet(mnemonic),
     litecoin: generateLitecoinWallet(mnemonic),
     bitcoinCash: generateBitcoinCashWallet(mnemonic),
@@ -114,7 +118,7 @@ app.get("/create-wallet", async (req, res) => {
 
     const mnemonic = generateMnemonic();
 
-    const wallets = generateWallets(mnemonic);
+    const wallets = await generateWallets(mnemonic);
 
     res.json({
       mnemonic,
@@ -128,7 +132,7 @@ app.get("/create-wallet", async (req, res) => {
 
 app.post("/open-wallet", async (req, res) => {
   try {
-    const wallets = generateWallets(req.body.mnemonic);
+    const wallets = await generateWallets(req.body.mnemonic);
 
     res.json({
       mnemonic: req.body.mnemonic,
