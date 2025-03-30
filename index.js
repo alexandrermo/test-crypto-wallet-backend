@@ -10,8 +10,10 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
+const etherumProvider = "https://rpc.ankr.com/eth_goerli";
+
 const generateEthereumWallet = (mnemonic) => {
-  const provider = new JsonRpcProvider("https://rpc.ankr.com/eth_goerli");
+  const provider = new JsonRpcProvider(etherumProvider);
   const wallet = ethers.Wallet.fromPhrase(mnemonic).connect(provider);
 
   return {
@@ -130,6 +132,42 @@ app.post("/open-wallet", async (req, res) => {
     res.json({
       mnemonic: req.body.mnemonic,
       wallets,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: `${error}` });
+  }
+});
+
+app.get("/total-supply-token", async (req, res) => {
+  try {
+    const provider = new JsonRpcProvider(etherumProvider);
+
+    const tokenChainlinkAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
+
+    const erc20Abi = [
+      "function totalSupply() view returns (uint256)",
+      "function decimals() view returns (uint8)",
+    ];
+
+    async function getTotalSupply() {
+      const contract = new ethers.Contract(
+        tokenChainlinkAddress,
+        erc20Abi,
+        provider
+      );
+      const totalSupply = await contract.totalSupply();
+      const decimals = await contract.decimals();
+      const totalSupplyFormatted = ethers.utils.formatUnits(
+        totalSupply,
+        decimals
+      );
+
+      return totalSupplyFormatted;
+    }
+
+    res.json({
+      totalSupply: getTotalSupply(),
     });
   } catch (error) {
     console.log(error);
