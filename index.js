@@ -10,6 +10,98 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
+const generateEthereumWallet = (mnemonic) => {
+  const provider = new JsonRpcProvider("https://rpc.ankr.com/eth_goerli");
+  const wallet = ethers.Wallet.fromPhrase(mnemonic).connect(provider);
+
+  return {
+    name: "Ethereum",
+    address: wallet.address,
+    privateKey: wallet.privateKey,
+  };
+};
+
+const generateBitcoinWallet = (mnemonic) => {
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+  const root = bip32.fromSeed(seed, bitcoin.networks.testnet);
+  const keyPair = root.derivePath("m/44'/0'/0'/0/0");
+  const { address } = bitcoin.payments.p2pkh({
+    pubkey: Buffer.from(keyPair.publicKey),
+    network: bitcoin.networks.testnet,
+  });
+  return {
+    name: "Bitcoin",
+    address,
+    privateKey: keyPair.toWIF(),
+  };
+};
+
+const generateLitecoinWallet = (mnemonic) => {
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+  const root = bip32.fromSeed(seed, bitcoin.networks.testnet);
+  const keyPair = root.derivePath("m/44'/2'/0'/0/0");
+  const { address } = bitcoin.payments.p2pkh({
+    pubkey: Buffer.from(keyPair.publicKey),
+    network: bitcoin.networks.testnet,
+  });
+  return {
+    name: "Litecoin",
+    address,
+    privateKey: keyPair.toWIF(),
+  };
+};
+
+const generateBitcoinCashWallet = (mnemonic) => {
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+
+  const bitcoinCashNetwork = {
+    messagePrefix: "\x18Bitcoin Cash Signed Message:\n",
+    bip32: { public: 0x043587cf, private: 0x04358394 },
+    pubKeyHash: 0x6f,
+    scriptHash: 0xc4,
+    wif: 0xef,
+  };
+
+  const root = bip32.fromSeed(seed, bitcoinCashNetwork);
+  const keyPair = root.derivePath("m/44'/145'/0'/0/0");
+  const { address } = bitcoin.payments.p2pkh({
+    pubkey: Buffer.from(keyPair.publicKey),
+    network: bitcoinCashNetwork,
+  });
+  return {
+    name: "Bitcoin Cash",
+    address,
+    privateKey: keyPair.toWIF(),
+  };
+};
+
+const generateDogecoinWallet = (mnemonic) => {
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+  const root = bip32.fromSeed(seed, bitcoin.networks.testnet);
+  const keyPair = root.derivePath("m/44'/3'/0'/0/0");
+  const { address } = bitcoin.payments.p2pkh({
+    pubkey: Buffer.from(keyPair.publicKey),
+    network: bitcoin.networks.testnet,
+  });
+  return {
+    name: "Dogecoin",
+    address,
+    privateKey: keyPair.toWIF(),
+  };
+};
+
+const generateWallets = (mnemonic) => {
+  const walletsGenerated = {
+    etherum: generateEthereumWallet(mnemonic),
+    bitcoin: generateBitcoinWallet(mnemonic),
+    litecoin: generateLitecoinWallet(mnemonic),
+    bitcoinCash: generateBitcoinCashWallet(mnemonic),
+    dogecoin: generateDogecoinWallet(mnemonic),
+  };
+
+  return walletsGenerated;
+};
+
 // Rota para criar carteira a partir de uma frase-semente
 app.get("/create-wallet", async (req, res) => {
   try {
@@ -17,101 +109,23 @@ app.get("/create-wallet", async (req, res) => {
       return bip39.generateMnemonic();
     };
 
-    const generateEthereumWallet = (mnemonic) => {
-      const provider = new JsonRpcProvider("https://rpc.ankr.com/eth_goerli");
-      const wallet = ethers.Wallet.fromPhrase(mnemonic).connect(provider);
-
-      return {
-        name: "Ethereum",
-        address: wallet.address,
-        privateKey: wallet.privateKey,
-      };
-    };
-
-    const generateBitcoinWallet = (mnemonic) => {
-      const seed = bip39.mnemonicToSeedSync(mnemonic);
-      const root = bip32.fromSeed(seed, bitcoin.networks.testnet);
-      const keyPair = root.derivePath("m/44'/0'/0'/0/0");
-      const { address } = bitcoin.payments.p2pkh({
-        pubkey: Buffer.from(keyPair.publicKey),
-        network: bitcoin.networks.testnet,
-      });
-      return {
-        name: "Bitcoin",
-        address,
-        privateKey: keyPair.toWIF(),
-      };
-    };
-
-    const generateLitecoinWallet = (mnemonic) => {
-      const seed = bip39.mnemonicToSeedSync(mnemonic);
-      const root = bip32.fromSeed(seed, bitcoin.networks.testnet);
-      const keyPair = root.derivePath("m/44'/2'/0'/0/0");
-      const { address } = bitcoin.payments.p2pkh({
-        pubkey: Buffer.from(keyPair.publicKey),
-        network: bitcoin.networks.testnet,
-      });
-      return {
-        name: "Litecoin",
-        address,
-        privateKey: keyPair.toWIF(),
-      };
-    };
-
-    const generateBitcoinCashWallet = (mnemonic) => {
-      const seed = bip39.mnemonicToSeedSync(mnemonic);
-
-      const bitcoinCashNetwork = {
-        messagePrefix: "\x18Bitcoin Cash Signed Message:\n",
-        bip32: { public: 0x043587cf, private: 0x04358394 },
-        pubKeyHash: 0x6f,
-        scriptHash: 0xc4,
-        wif: 0xef,
-      };
-
-      const root = bip32.fromSeed(seed, bitcoinCashNetwork);
-      const keyPair = root.derivePath("m/44'/145'/0'/0/0");
-      const { address } = bitcoin.payments.p2pkh({
-        pubkey: Buffer.from(keyPair.publicKey),
-        network: bitcoinCashNetwork,
-      });
-      return {
-        name: "Bitcoin Cash",
-        address,
-        privateKey: keyPair.toWIF(),
-      };
-    };
-
-    const generateDogecoinWallet = (mnemonic) => {
-      const seed = bip39.mnemonicToSeedSync(mnemonic);
-      const root = bip32.fromSeed(seed, bitcoin.networks.testnet);
-      const keyPair = root.derivePath("m/44'/3'/0'/0/0");
-      const { address } = bitcoin.payments.p2pkh({
-        pubkey: Buffer.from(keyPair.publicKey),
-        network: bitcoin.networks.testnet,
-      });
-      return {
-        name: "Dogecoin",
-        address,
-        privateKey: keyPair.toWIF(),
-      };
-    };
-
     const mnemonic = generateMnemonic();
 
-    const generateWallets = () => {
-      const walletsGenerated = {
-        etherum: generateEthereumWallet(mnemonic),
-        bitcoin: generateBitcoinWallet(mnemonic),
-        litecoin: generateLitecoinWallet(mnemonic),
-        bitcoinCash: generateBitcoinCashWallet(mnemonic),
-        dogecoin: generateDogecoinWallet(mnemonic),
-      };
+    const wallets = generateWallets(mnemonic);
 
-      return walletsGenerated;
-    };
+    res.json({
+      mnemonic,
+      wallets,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: `${error}` });
+  }
+});
 
-    const wallets = generateWallets();
+app.post("/open-wallet", async (req, res) => {
+  try {
+    const wallets = generateWallets(req.body.mnemonic);
 
     res.json({
       mnemonic,
