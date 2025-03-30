@@ -128,7 +128,7 @@ app.post("/open-wallet", async (req, res) => {
     const wallets = generateWallets(req.body.mnemonic);
 
     res.json({
-      mnemonic,
+      mnemonic: req.body.mnemonic,
       wallets,
     });
   } catch (error) {
