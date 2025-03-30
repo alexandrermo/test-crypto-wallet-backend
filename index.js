@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
-const etherumProvider = "https://rpc.ankr.com/eth_goerli";
+const etherumProvider = "https://rpc.goerli.mudit.blog";
 
 const generateEthereumWallet = (mnemonic) => {
   const provider = new JsonRpcProvider(etherumProvider);
