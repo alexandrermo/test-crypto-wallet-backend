@@ -10,15 +10,15 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
-const etherumProvider =
+const sepoliaEtherumProviderUrl =
   "https://sepolia.infura.io/v3/76738d80216e4e46a761b1bdec75d9bf";
 
 const generateEthereumWallet = (mnemonic) => {
-  const provider = new JsonRpcProvider(etherumProvider);
+  const provider = new JsonRpcProvider(sepoliaEtherumProviderUrl);
   const wallet = ethers.Wallet.fromPhrase(mnemonic).connect(provider);
 
   return {
-    name: "Ethereum",
+    name: "Sepolia Ethereum",
     address: wallet.address,
     privateKey: wallet.privateKey,
   };
@@ -142,7 +142,7 @@ app.post("/open-wallet", async (req, res) => {
 
 app.get("/total-supply-token", async (req, res) => {
   try {
-    const provider = new JsonRpcProvider(etherumProvider);
+    const provider = new JsonRpcProvider(sepoliaEtherumProviderUrl);
 
     const tokenChainlinkAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
 
