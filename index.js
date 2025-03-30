@@ -115,13 +115,7 @@ app.get("/create-wallet", async (req, res) => {
 
     res.json({
       mnemonic,
-      addresses: {
-        Bitcoin: wallets.bitcoin.address,
-        Ethereum: wallets.etherum.address,
-        Litecoin: wallets.litecoin.address,
-        Dogecoin: wallets.dogecoin.address,
-        BitcoinCash: wallets.bitcoinCash.address,
-      },
+      wallets,
     });
   } catch (error) {
     console.log(error);
