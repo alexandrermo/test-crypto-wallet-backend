@@ -1,7 +1,7 @@
 const express = require("express");
 const bip39 = require("bip39");
 const bitcoin = require("bitcoinjs-lib");
-const { ethers } = require("ethers");
+const { ethers, JsonRpcProvider } = require("ethers");
 const ecc = require("tiny-secp256k1");
 const bip32 = require("bip32").BIP32Factory(ecc);
 
@@ -18,9 +18,7 @@ app.get("/create-wallet", async (req, res) => {
     };
 
     const generateEthereumWallet = (mnemonic) => {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "https://rpc.ankr.com/eth_goerli"
-      );
+      const provider = new JsonRpcProvider("https://rpc.ankr.com/eth_goerli");
       const wallet = ethers.Wallet.fromPhrase(mnemonic).connect(provider);
 
       return {
